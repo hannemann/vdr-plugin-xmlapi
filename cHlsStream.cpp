@@ -340,6 +340,7 @@ int cHlsStream::writeM3U8(const unsigned int first_segment, const unsigned int l
     else {
         snprintf(write_buf, 1024, "#EXTM3U\n#EXT-X-TARGETDURATION:%d\n", this->parameter.SegmentDuration());
     }
+    snprintf(write_buf, 1024, "#EXT-X-VERSION:%d\n", "3");
     tmp_m3u8 += write_buf;
     for (unsigned int i = first_segment; i <= last_segment; i++) {
         snprintf(write_buf, 1024, "#EXTINF:%d,\n%s%d-%u.ts\n", this->parameter.SegmentDuration(), this->parameter.BaseUrl().c_str(), this->streamid, i);
