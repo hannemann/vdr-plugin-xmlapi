@@ -39,7 +39,7 @@ cRequestHandler::~cRequestHandler() {
 
 int cRequestHandler::HandleRequest(const char* url) {
 
-    this->auth = new cAuth(this->connection, this->daemonParameter);
+    this->auth = new cAuth(this->connection, this->daemonParameter, url);
 
     if (!this->auth->authenticated()) return this->handleNotAuthenticated();
 

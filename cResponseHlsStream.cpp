@@ -35,6 +35,7 @@ int cResponseHlsStream::toStream(const char *url) {
     		return this->toM3u8();
     	}
     } else {
+
     	return this->toTs();
     }
 
@@ -100,7 +101,7 @@ int cResponseHlsStream::toM3u8() {
         stream->SetStreamName(streamName);
         int streamid = StreamControl->AddStream(stream);
         stream->SetStreamId(streamid);
-        if(!stream->StartStream(this->input, this->starttime)) {
+        if(!stream->StartStream(this->input, this->session->GetSessionId(), this->starttime)) {
             StreamControl->RemoveStream(streamid);
             return this->handle404Error();
         }
@@ -141,8 +142,8 @@ int cResponseHlsStream::toM3u8() {
 
 int cResponseHlsStream::toTs() {
 
-	vector<string> parts = split(file, '-');
-	if(parts.size() != 2)
+	vector<string> parts = split(this->file, '-');
+	if(parts.size() != 3)
 		return this->handle404Error();
 	int streamid = atoi(parts[0].c_str());
 	StreamControl->Mutex.Lock();
@@ -150,7 +151,7 @@ int cResponseHlsStream::toTs() {
 	StreamControl->Mutex.Unlock();
 	if(stream != NULL) {
 		StreamControl->Mutex.Lock();
-		string tsFile = stream->StreamPath() + file;
+		string tsFile = stream->StreamPath() + this->file;
 		StreamControl->Mutex.Unlock();
 		int fd;
 		struct stat sbuf;

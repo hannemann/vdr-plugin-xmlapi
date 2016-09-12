@@ -63,7 +63,7 @@ string cSession::Expires() const {
 }
 
 string cSession::Cookie() const {
-    string cookie = "vdr-plugin-xmlapi_sessionid=" + this->sessionId + ";expires=" + this->Expires();
+    string cookie = "xmlapi-sid=" + this->sessionId + ";expires=" + this->Expires();
     return cookie;
 }
 
@@ -80,7 +80,7 @@ void cSession::defaultRand(unsigned char *buf, size_t len) {
 
 string cSession::generateSessionId() {
     string id = "";
-    unsigned char buf[64];
+    unsigned char buf[16];
     char hexBuf[3];
     FILE *f = NULL;
     f = fopen("/dev/urandom", "r");

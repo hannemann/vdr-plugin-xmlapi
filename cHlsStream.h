@@ -48,9 +48,10 @@ public:
     int StreamId();
     
     void SetStreamId(int id);
+    void SetSessionId(string id);
     void SetStreamName(string streamName);
     bool StartStream();
-    bool StartStream(string input, int start = 0);
+    bool StartStream(string input, string sessionId, int start = 0);
     void StopStream();
     string m3u8File();
     string StreamPath();
@@ -60,6 +61,7 @@ public:
 private:
     cHlsPreset preset;
     int streamid;
+    string sessionId;
     string streamName;
     string hlsTmpPath;
     string streamPath;

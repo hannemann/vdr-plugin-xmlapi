@@ -44,6 +44,10 @@ void cHlsStream::SetStreamId(int id) {
     streamPath = hlsTmpPath + "/" + intToString(this->streamid);
 }
 
+void cHlsStream::SetSessionId(string id) {
+    this->sessionId = id;
+}
+
 void cHlsStream::SetStreamName(string streamName) {
     this->streamName = streamName;
 }
@@ -138,8 +142,8 @@ bool cHlsStream::StartStream() {
     return true;
 }
 
-bool cHlsStream::StartStream(string input, int start) {
-    this->SetFFmpegCmd(this->preset.FFmpegCmd(this->ffmpeg, input, this->hlsTmpPath, this->streamid, start));
+bool cHlsStream::StartStream(string input, string sessionId, int start) {
+    this->SetFFmpegCmd(this->preset.FFmpegCmd(this->ffmpeg, input, this->hlsTmpPath, this->streamid, sessionId, start));
     return this->StartStream();
     
 }

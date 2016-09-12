@@ -14,7 +14,7 @@ using namespace std;
 class cAuth {
 
 public:
-	cAuth(struct MHD_Connection *connection, cDaemonParameter *daemonParameter);
+	cAuth(struct MHD_Connection *connection, cDaemonParameter *daemonParameter, const char *url);
 	virtual ~cAuth();
 	bool authenticated();
 
@@ -24,12 +24,15 @@ public:
 private:
 	struct MHD_Connection *connection;
     cDaemonParameter *daemonParameter;
+	const char *url;
     cPluginConfig config;
 	cUser user;
 	cSession *session;
 
 	bool authBasic();
 	bool authSession();
+	const char *getCookie();
+	bool isHlsStreamUrl();
 };
 
 #endif /* CAUTH_H */

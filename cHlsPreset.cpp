@@ -38,7 +38,7 @@ cHlsPreset& cHlsPreset::operator =(const cHlsPreset& src) {
     return *this;
 }
 
-string cHlsPreset::FFmpegCmd(string ffmpeg, string input, string hlsTmpPath, int streamid, int start) {
+string cHlsPreset::FFmpegCmd(string ffmpeg, string input, string hlsTmpPath, int streamid, string sessionId, int start) {
     string hlstmp = hlsTmpPath + "/" + intToString(streamid);
     
     string rstring = "{ffmpeg}";
@@ -75,6 +75,10 @@ string cHlsPreset::FFmpegCmd(string ffmpeg, string input, string hlsTmpPath, int
     rstring = "{hls_tmp_path}";
     while((start_pos = cmd.find(rstring)) != std::string::npos) {
         cmd.replace(start_pos, rstring.length(), hlstmp);
+    }
+    rstring = "{sid}";
+    while((start_pos = cmd.find(rstring)) != std::string::npos) {
+        cmd.replace(start_pos, rstring.length(), sessionId);
     }
     return cmd;
 }
