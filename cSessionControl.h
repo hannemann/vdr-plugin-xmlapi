@@ -45,11 +45,12 @@ public:
     void RemoveExpiredSessions();
     
     cMutex Mutex;
-    
+    void Lock();
+    void Unlock();
+    bool locked;
     
     
 private:
-    
 
 };
 

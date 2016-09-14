@@ -56,14 +56,20 @@ bool cAuth::authSession() {
 
 		dsyslog("xmlapi: found cookie id: %s", cookie);
 
+		while (SessionControl->locked) {
+			usleep(1000);
+		}
+
 		SessionControl->Mutex.Lock();
 		string sessionid(cookie);
 		cSession* session = SessionControl->GetSessionBySessionId(sessionid);
+		dsyslog("xmlapi: found session width id: %s", cookie);
 
 		if (session != NULL && !session->IsExpired()) {
 			const cUser *sessionUser = SessionControl->GetUserBySessionId(sessionid);
 			if(sessionUser != NULL) {
 				this->user = this->config.GetUsers().GetUser(sessionUser->Name().c_str());
+				dsyslog("xmlapi: found user %s session width id: %s", this->user.Name().c_str(), cookie);
 				this->session = session;
 				this->session->UpdateStart();
 				hasSession = true;
@@ -91,20 +97,27 @@ bool cAuth::authBasic() {
         char *user = NULL;
         char *pass = NULL;
         user = MHD_basic_auth_get_username_password (this->connection, &pass);
+		dsyslog("xmlapi: found user %s", user);
         validUser = user != NULL && this->config.GetUsers().MatchUser(user, pass);
         if (validUser) {
+    		dsyslog("xmlapi: found user %s matches password", user);
         	this->user = this->config.GetUsers().GetUser(user);
         	cSession session = SessionControl->AddSession(this->user, lifetime);
         	this->session = SessionControl->GetSessionBySessionId(session.GetSessionId());
 			dsyslog("xmlapi: !!!!!!!!!!!!!authBasic() -> authenticated user %s", this->user.Name().c_str());
 			dsyslog("xmlapi: session id: %s", this->session->GetSessionId().c_str());
 			dsyslog("xmlapi: requested url: %s", this->url);
+        } else {
+    		dsyslog("xmlapi: auth failed for user %s", user);
         }
         if (user != NULL) free (user);
         if (pass != NULL) free (pass);
     } else {
     	cSession session = SessionControl->AddSession(this->user, lifetime);
     	this->session = SessionControl->GetSessionBySessionId(session.GetSessionId());
+		dsyslog("xmlapi: !!!!!!!!!!!!!authBasic() -> authenticated user %s", this->user.Name().c_str());
+		dsyslog("xmlapi: session id: %s", this->session->GetSessionId().c_str());
+		dsyslog("xmlapi: requested url: %s", this->url);
     }
     return validUser;
 };

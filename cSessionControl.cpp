@@ -15,10 +15,10 @@
 #include "cSessionControl.h"
 #include "helpers.h"
 
-cSessionControl::cSessionControl() {
+cSessionControl::cSessionControl() : locked(false) {
 }
 
-cSessionControl::cSessionControl(const cSessionControl& src) : map<cUser, vector<cSession> >(src) {
+cSessionControl::cSessionControl(const cSessionControl& src) : map<cUser, vector<cSession> >(src), locked(false) {
 }
 
 cSessionControl::~cSessionControl() {
@@ -132,4 +132,16 @@ void cSessionControl::RemoveExpiredSessions() {
         }
     }
     this->Mutex.Unlock();
+}
+
+void cSessionControl::Lock() {
+
+	this->locked = true;
+	this->Mutex.Lock();
+}
+
+void cSessionControl::Unlock() {
+
+	this->Mutex.Unlock();
+	this->locked = false;
 }

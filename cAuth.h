@@ -8,6 +8,7 @@
 #include "cPluginConfig.h"
 #include "cSession.h"
 #include "cUser.h"
+#include <unistd.h>
 
 using namespace std;
 
