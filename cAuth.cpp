@@ -40,10 +40,7 @@ const char *cAuth::getCookie() {
 
 bool cAuth::isHlsStreamUrl() {
 
-	string urlStr = this->url;
-	string ext = urlStr.substr(urlStr.find_last_of("."));
-
-	return ext == ".ts" || ext == ".m3u8";
+	return startswith(this->url, "/hls/");
 };
 
 bool cAuth::authSession() {
