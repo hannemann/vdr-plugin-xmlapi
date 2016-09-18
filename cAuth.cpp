@@ -98,8 +98,8 @@ bool cAuth::authBasic() {
         if (validUser) {
     		dsyslog("xmlapi: user %s matches password", user);
         	this->user = this->config.GetUsers().GetUser(user);
-
         	this->addSession();
+
 			dsyslog("xmlapi: !!!!!!!!!!!!!authBasic() -> authenticated user %s", this->user.Name().c_str());
 			dsyslog("xmlapi: requested url: %s", this->url);
         } else {
@@ -133,6 +133,7 @@ void cAuth::addSession() {
 	} else {
 		dsyslog("xmlapi: found session for user-agent %s with ip %s, but request lacks cookie. Assuming client does not accept cookies",
 				this->conInfo["User-Agent"].c_str(), this->conInfo["ClientIP"].c_str());
+		this->session = SessionControl->GetSessionBySessionId(session->GetSessionId());
 	}
 };
 
