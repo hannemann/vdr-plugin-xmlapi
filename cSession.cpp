@@ -19,12 +19,6 @@ cSession::cSession(long lifetime, string userAgent, string remoteAddr)
 	  remoteAddr(remoteAddr),
 	  sessionId(generateSessionId()),
 	  start(time(NULL)) {
-
-/*
-	dsyslog("############## setting ua: %s", userAgent.c_str());
-	this->userAgent = userAgent;
-	this->remoteAddr = remoteAddr;
-	*/
 }
 
 cSession::cSession(const cSession& src)
@@ -87,7 +81,7 @@ string cSession::Expires() const {
 }
 
 string cSession::Cookie() const {
-    string cookie = "xmlapi-sid=" + this->sessionId + ";expires=" + this->Expires();
+    string cookie = "xmlapi-sid=" + this->sessionId + ";expires=" + this->Expires() + ";path=/";
     return cookie;
 }
 

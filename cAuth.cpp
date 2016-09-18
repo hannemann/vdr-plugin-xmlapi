@@ -61,13 +61,13 @@ bool cAuth::authSession() {
 		SessionControl->Mutex.Lock();
 		string sessionid(cookie);
 		cSession* session = SessionControl->GetSessionBySessionId(sessionid);
-		dsyslog("xmlapi: found session width id: %s", cookie);
+		dsyslog("xmlapi: found session with id: %s", cookie);
 
 		if (session != NULL && !session->IsExpired()) {
 			const cUser *sessionUser = SessionControl->GetUserBySessionId(sessionid);
 			if(sessionUser != NULL) {
 				this->user = this->config.GetUsers().GetUser(sessionUser->Name().c_str());
-				dsyslog("xmlapi: found user %s session width id: %s", this->user.Name().c_str(), cookie);
+				dsyslog("xmlapi: found user %s session with id: %s", this->user.Name().c_str(), cookie);
 				this->session = session;
 				this->session->UpdateStart();
 				hasSession = true;
@@ -110,6 +110,8 @@ bool cAuth::authBasic() {
     } else {
 
     	this->addSession();
+    	/* please leave me here :) sessions don't work for user Anonymous otherwise */
+    	this->user = this->config.GetUsers().GetUser("Anonymous");
 		dsyslog("xmlapi: !!!!!!!!!!!!!authBasic() -> authenticated user %s", this->user.Name().c_str());
 		dsyslog("xmlapi: requested url: %s", this->url);
     }
@@ -120,11 +122,10 @@ void cAuth::addSession() {
 
 	const char* createAction = "1200";
     long lifetime = atol(createAction);
-    cSession* session;
     string userAgent = this->conInfo["User-Agent"];
     string remoteAddr = this->conInfo["ClientIP"];
+    cSession* session = SessionControl->GetSessionByConnectionInfo(this->user, userAgent, remoteAddr);
 
-	session = SessionControl->GetSessionByConnectionInfo(this->user, userAgent, remoteAddr);
 	if (session == NULL) {
 		cSession newSession = SessionControl->AddSession(this->user, lifetime, userAgent, remoteAddr);
 		this->session = SessionControl->GetSessionBySessionId(newSession.GetSessionId());
