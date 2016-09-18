@@ -32,11 +32,12 @@ public:
     virtual ~cSessionControl();
     
     vector<cSession> GetSessions(cUser user);
-    cSession AddSession(cUser user, long lifetime);
+    cSession AddSession(cUser user, long lifetime, string userAgent, string remoteAddr);
     void AddSession(cUser user, cSession session);
     
     const cUser* GetUserBySessionId(string sessionId);   
     cSession* GetSessionBySessionId(string sessionId);
+    cSession* GetSessionByConnectionInfo(cUser user, string userAgent, string remoteAddr);
     
     void RemoveSessionBySessionId(string sessionId);
     void RemoveSessionsByUser(cUser user);

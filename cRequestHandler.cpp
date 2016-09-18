@@ -31,7 +31,10 @@
 
 cRequestHandler::cRequestHandler(struct MHD_Connection *connection,
                                     cDaemonParameter *daemonParameter)
-    : connection(connection), daemonParameter(daemonParameter), auth(NULL) {};
+    : connection(connection), daemonParameter(daemonParameter), auth(NULL) {
+
+	this->initConInfo();
+};
 
 cRequestHandler::~cRequestHandler() {
 	delete this->auth;
@@ -39,7 +42,7 @@ cRequestHandler::~cRequestHandler() {
 
 int cRequestHandler::HandleRequest(const char* url) {
 
-    this->auth = new cAuth(this->connection, this->daemonParameter, url);
+    this->auth = new cAuth(this->connection, this->daemonParameter, url, this->conInfo);
 
     if (!this->auth->authenticated()) return this->handleNotAuthenticated();
 
@@ -120,6 +123,44 @@ int cRequestHandler::HandleRequest(const char* url) {
     }
     return MHD_NO;
 }
+
+
+
+void cRequestHandler::initConInfo() {
+
+    const MHD_ConnectionInfo *connectionInfo = MHD_get_connection_info (this->connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
+    if (connectionInfo->client_addr->sa_family == AF_INET)
+    {
+        struct sockaddr_in *sin = (struct sockaddr_in *) connectionInfo->client_addr;
+        char *ip = inet_ntoa(sin->sin_addr);
+        if(ip != NULL)
+        {
+            this->conInfo.insert(pair<string,string>("ClientIP", string(ip)));
+        }
+    }
+    const char *useragent = MHD_lookup_connection_value(this->connection, MHD_HEADER_KIND, "User-Agent");
+    if(useragent != NULL)
+    {
+        this->conInfo.insert(pair<string,string>("User-Agent",string(useragent)));
+    }
+    const char *host = MHD_lookup_connection_value(this->connection, MHD_HEADER_KIND, "Host");
+    if(host != NULL)
+    {
+        this->conInfo.insert(pair<string,string>("Host", string(host)));
+    }
+    const char *origin = NULL;
+	string corsConfig = this->daemonParameter->GetPluginConfig().GetCorsOrigin();
+
+	if ("auto" == corsConfig) {
+		origin = MHD_lookup_connection_value(this->connection, MHD_HEADER_KIND, "Origin");
+	} else {
+		origin = corsConfig.c_str();
+	}
+    if(origin != NULL)
+    {
+        this->conInfo.insert(pair<string,string>("Origin", string(origin)));
+    }
+};
 
 cResponseHandler cRequestHandler::GetErrorHandler() {
 

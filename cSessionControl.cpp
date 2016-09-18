@@ -37,17 +37,17 @@ vector<cSession> cSessionControl::GetSessions(cUser user) {
     return emptySessions;
 }
 
-cSession cSessionControl::AddSession(cUser user, long lifetime) {
+cSession cSessionControl::AddSession(cUser user, long lifetime, string userAgent, string remoteAddr) {
     this->Mutex.Lock();
     map<cUser, vector<cSession> >::iterator it = this->find(user);
     if(it != this->end()) {
-        cSession session(lifetime);
+        cSession session(lifetime, userAgent, remoteAddr);
         (*this)[user].push_back(session);
         this->Mutex.Unlock();
         return session;
     }
     vector<cSession> sessions;
-    cSession session(lifetime);
+    cSession session(lifetime, userAgent, remoteAddr);
     sessions.push_back(session);
     this->insert(pair<cUser, vector<cSession> >(user, sessions));
     this->Mutex.Unlock();
@@ -83,6 +83,18 @@ cSession* cSessionControl::GetSessionBySessionId(string sessionId) {
             if(itv->GetSessionId() == sessionId)
                 return &(*itv);
         }
+    }
+    return NULL;
+}
+
+cSession* cSessionControl::GetSessionByConnectionInfo(cUser user, string userAgent, string remoteAddr) {
+    for(map<cUser, vector<cSession> >::iterator it = this->begin(); it != this->end(); ++it) {
+    	if (it->first.Name() == user.Name()) {
+			for(vector<cSession>::iterator itv = it->second.begin(); itv != it->second.end(); ++itv) {
+				if(itv->GetUserAgent() == userAgent && itv->GetRemoteAddr() == remoteAddr)
+					return &(*itv);
+			}
+    	}
     }
     return NULL;
 }

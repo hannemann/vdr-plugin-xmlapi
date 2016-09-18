@@ -26,13 +26,15 @@ using namespace std;
 
 class cSession {
 public:
-    cSession(long lifetime);
+    cSession(long lifetime, string userAgent, string remoteAddr);
     cSession(const cSession& src);
     virtual ~cSession();
     
     cSession& operator = (const cSession& src);
     
     string GetSessionId() const;
+    string GetUserAgent() const;
+    string GetRemoteAddr() const;
     long GetLifetime() const;
     time_t GetStart() const;
     bool IsExpired() const;
@@ -42,6 +44,8 @@ public:
     
 private:
     long lifetime;
+    string userAgent;
+    string remoteAddr;
     string sessionId;
     time_t start;
     

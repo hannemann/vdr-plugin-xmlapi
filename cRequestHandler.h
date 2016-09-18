@@ -34,6 +34,8 @@ private:
     
     int handleNotAuthenticated();
     cResponseHandler GetErrorHandler();
+    map<string, string> conInfo;
+    void initConInfo();
 };
 
 #endif /* CREQUESTHANDLER_H */

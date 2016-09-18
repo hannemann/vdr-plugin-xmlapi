@@ -13,10 +13,26 @@
 
 #include "cSession.h"
 
-cSession::cSession(long lifetime) : lifetime(lifetime ? lifetime : 60*60*24*365), sessionId(generateSessionId()), start(time(NULL)) {
+cSession::cSession(long lifetime, string userAgent, string remoteAddr)
+	: lifetime(lifetime ? lifetime : 60*60*24*365),
+	  userAgent(userAgent),
+	  remoteAddr(remoteAddr),
+	  sessionId(generateSessionId()),
+	  start(time(NULL)) {
+
+/*
+	dsyslog("############## setting ua: %s", userAgent.c_str());
+	this->userAgent = userAgent;
+	this->remoteAddr = remoteAddr;
+	*/
 }
 
-cSession::cSession(const cSession& src) : lifetime(src.lifetime), sessionId(src.sessionId), start(src.start) {
+cSession::cSession(const cSession& src)
+	: lifetime(src.lifetime),
+	  userAgent(src.userAgent),
+	  remoteAddr(src.remoteAddr),
+	  sessionId(src.sessionId),
+	  start(src.start) {
 }
 
 cSession::~cSession() {
@@ -33,6 +49,14 @@ cSession& cSession::operator =(const cSession& src) {
 
 string cSession::GetSessionId() const {
     return this->sessionId;
+}
+
+string cSession::GetUserAgent() const {
+    return this->userAgent;
+}
+
+string cSession::GetRemoteAddr() const {
+    return this->remoteAddr;
 }
 
 long cSession::GetLifetime() const {

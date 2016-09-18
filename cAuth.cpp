@@ -1,10 +1,11 @@
 #include "cAuth.h"
 #include "globals.h"
 
-cAuth::cAuth(struct MHD_Connection *connection, cDaemonParameter *daemonParameter, const char *url)
+cAuth::cAuth(struct MHD_Connection *connection, cDaemonParameter *daemonParameter, const char *url, map<string, string> conInfo)
 	: connection(connection),
 	  daemonParameter(daemonParameter),
 	  url(url),
+	  conInfo(conInfo),
 	  config(daemonParameter->GetPluginConfig()) {
 
 	this->session = NULL;
@@ -87,8 +88,6 @@ bool cAuth::authSession() {
 bool cAuth::authBasic() {
 
 	bool validUser = true;
-	const char* createAction = "1200";
-    long lifetime = atol(createAction);
 
     if(!this->config.GetUsers().empty()) {
         char *user = NULL;
@@ -97,12 +96,11 @@ bool cAuth::authBasic() {
 		dsyslog("xmlapi: found user %s", user);
         validUser = user != NULL && this->config.GetUsers().MatchUser(user, pass);
         if (validUser) {
-    		dsyslog("xmlapi: found user %s matches password", user);
+    		dsyslog("xmlapi: user %s matches password", user);
         	this->user = this->config.GetUsers().GetUser(user);
-        	cSession session = SessionControl->AddSession(this->user, lifetime);
-        	this->session = SessionControl->GetSessionBySessionId(session.GetSessionId());
+
+        	this->addSession();
 			dsyslog("xmlapi: !!!!!!!!!!!!!authBasic() -> authenticated user %s", this->user.Name().c_str());
-			dsyslog("xmlapi: session id: %s", this->session->GetSessionId().c_str());
 			dsyslog("xmlapi: requested url: %s", this->url);
         } else {
     		dsyslog("xmlapi: auth failed for user %s", user);
@@ -110,13 +108,31 @@ bool cAuth::authBasic() {
         if (user != NULL) free (user);
         if (pass != NULL) free (pass);
     } else {
-    	cSession session = SessionControl->AddSession(this->user, lifetime);
-    	this->session = SessionControl->GetSessionBySessionId(session.GetSessionId());
+
+    	this->addSession();
 		dsyslog("xmlapi: !!!!!!!!!!!!!authBasic() -> authenticated user %s", this->user.Name().c_str());
-		dsyslog("xmlapi: session id: %s", this->session->GetSessionId().c_str());
 		dsyslog("xmlapi: requested url: %s", this->url);
     }
     return validUser;
+};
+
+void cAuth::addSession() {
+
+	const char* createAction = "1200";
+    long lifetime = atol(createAction);
+    cSession* session;
+    string userAgent = this->conInfo["User-Agent"];
+    string remoteAddr = this->conInfo["ClientIP"];
+
+	session = SessionControl->GetSessionByConnectionInfo(this->user, userAgent, remoteAddr);
+	if (session == NULL) {
+		cSession newSession = SessionControl->AddSession(this->user, lifetime, userAgent, remoteAddr);
+		this->session = SessionControl->GetSessionBySessionId(newSession.GetSessionId());
+		dsyslog("xmlapi: added session width id: %s", this->session->GetSessionId().c_str());
+	} else {
+		dsyslog("xmlapi: found session for user-agent %s with ip %s, but request lacks cookie. Assuming client does not accept cookies",
+				this->conInfo["User-Agent"].c_str(), this->conInfo["ClientIP"].c_str());
+	}
 };
 
 bool cAuth::authenticated() {

@@ -4,6 +4,7 @@
 
 #include <string>
 #include <microhttpd.h>
+#include <map>
 #include "cDaemonParameter.h"
 #include "cPluginConfig.h"
 #include "cSession.h"
@@ -15,7 +16,7 @@ using namespace std;
 class cAuth {
 
 public:
-	cAuth(struct MHD_Connection *connection, cDaemonParameter *daemonParameter, const char *url);
+	cAuth(struct MHD_Connection *connection, cDaemonParameter *daemonParameter, const char *url, map<string, string> conInfo);
 	virtual ~cAuth();
 	bool authenticated();
 
@@ -26,6 +27,7 @@ private:
 	struct MHD_Connection *connection;
     cDaemonParameter *daemonParameter;
 	const char *url;
+	map<string, string> conInfo;
     cPluginConfig config;
 	cUser user;
 	cSession *session;
@@ -34,6 +36,7 @@ private:
 	bool authSession();
 	const char *getCookie();
 	bool isHlsStreamUrl();
+	void addSession();
 };
 
 #endif /* CAUTH_H */
